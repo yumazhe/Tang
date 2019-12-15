@@ -1,0 +1,88 @@
+​
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<!-- 引入element样式 -->
+	<link rel="stylesheet" href="./css/index.css">
+	<!-- 引入公用样式 -->
+	<link rel="stylesheet" href="./css/common.css">
+	<title>配置中心</title>
+	<!-- 引入vue -->
+	<script src="./js/vue.js"></script>
+	<!-- 引入element组件库 -->
+	<script src="./js/index.js"></script>
+	<script src="./js/tang.js"></script>
+</head>
+<body>
+	<div id="app">
+		<el-container>
+			<!-- 顶栏 -->
+			<el-header height="60">
+				<div class="_title" @click="index()">Tang</div>
+
+				<div class="_center" @click="tologin()">登录</div>
+
+			</el-header>
+ 
+ 			<!-- 主体 -->
+			<el-main>
+
+				<div class="welcome">
+					<h1>欢迎来到配置中心。</h1>
+
+				</div>
+				
+				
+			</el-main>
+
+		</el-container>
+	</div>
+ 
+</body>
+	<script>
+
+		// Vue实例化
+		new Vue({
+			el:'#app',
+			data: {
+				loginFlag: false
+			},
+			methods: {
+				// 跳转登录页面
+				tologin: function(){
+					window.location.href = "./pages/login.html";
+				},
+				
+				
+				
+				// 判断token是否登录或者超时
+				judgeLogin: function(){
+
+					 // 获取缓存
+					var name = expired();
+					console.log("用户名："+name)
+
+					if(name === ''){
+						this.loginFlag = false
+
+					}else{
+						window.location.href = "./pages/configList.html";
+					}
+
+				}
+
+			},
+
+			mounted: function() {
+				// 判断是否登录
+				this.judgeLogin()
+
+			},
+		})
+	</script>
+</html>
+ 
+​

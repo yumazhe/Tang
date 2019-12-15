@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tang.web.mapper.ITangAppMapper">
+
+    <resultMap id="appMapper" type="com.tang.web.entities.app.AppPO">
+        <result column="app_id"  property="appId" />
+        <result column="app_name"  property="appName" />
+        <result column="app_description"  property="appDescription" />
+        <result column="create_time"  property="createTime" />
+        <result column="update_time"  property="updateTime" />
+    </resultMap>
+
+    <!--    保存应用-->
+    <insert id="save" parameterType="com.tang.web.entities.app.AppPO" useGeneratedKeys="true" keyProperty="appId">
+        insert into t_app
+        (app_name, app_description)
+        values
+        (#{appName}, #{appDescription});
+    </insert>
+    <!--    查询应用列表-->
+    <select id="list" resultMap="appMapper">
+        select app_id, app_name, app_description, create_time, update_time from t_app;
+    </select>
+
+</mapper>

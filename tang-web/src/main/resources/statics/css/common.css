@@ -1,0 +1,109 @@
+#app {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  color: #756C83;
+}
+body{
+  margin: 0;
+  /* margin-top: -20px; */
+}
+
+.el-header {
+  text-align: center;
+  background-color: #409EFF;
+  color: white;
+}
+._title{
+  height: 60px;
+  font-size: 40px;
+  margin-left: 120px;
+  position: absolute;
+}
+._center{
+  font-size: 18px;
+  line-height: 60px;
+  position: relative;
+  margin-right: 100px;
+  float: right;
+}
+.el-main{
+  /* display: flex;
+  justify-content: center;
+  align-items: center; */
+}
+
+.welcome{
+  margin: auto;
+  width: 80%;
+  height: 400px;
+  border: solid 1px red;
+}
+
+
+.login-wrap{
+  width: 50%;
+  min-width: 400px;
+  max-width: 500px;
+  margin: 200px auto 0;
+}
+.btn-wrap{
+  padding: 10px 0;
+  text-align: center;
+}
+.btn-login{
+  width: 100%;
+}
+.btn-reset{
+  width: 100%;
+}
+.el-table th>.cell{
+  font-size: 14px;
+  text-align: center;
+}
+.createConfig-wrap{
+  width: 50%;
+  min-width: 400px;
+  max-width: 500px;
+  margin: 60px auto 0;
+}
+.createConfig-wrap .el-select{
+  width: 100%;
+}
+.dialog-createConfig .el-dialog{
+  min-width: 400px;
+  max-width: 650px;
+  border-radius: 5px;
+}
+.baseInfo{
+  max-width: 500px;
+  margin: 0 auto;
+}
+.dialog-footer{
+  text-align: right;
+  padding: 10px 0;
+}
+.config-wrap{
+  /* display: flex;
+  justify-content: space-between; */
+}
+.config-wrap .left{
+  float: left;
+  min-width: 200px;
+  padding: 0 16px;
+}
+.config-wrap .right{
+  padding-left: 260px;
+}
+.el-table .cell{
+  text-align: center;
+}
+
+.bread_crumb{
+  margin-bottom: 10px;
+  color: blue;
+}
+.radio-group{
+  border: solid 1px red;
+}
+.el-radio-button__inner, .el-radio-group{
+  line-height: 48px;
+}

@@ -1,0 +1,120 @@
+​
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- 引入element样式 -->
+	<link rel="stylesheet" href="../css/index.css">
+	<!-- 引入公用样式 -->
+	<link rel="stylesheet" href="../css/common.css">
+	<title>登录</title>
+	<!-- 引入vue -->
+	<script src="../js/vue.js"></script>
+	<script src="../js/tang.js"></script>
+	<!-- 引入element组件库 -->
+	<script src="../js/index.js"></script>
+	<script src="../js/axios.min.js"></script>
+</head>
+<body>
+	<div id="app">
+		<el-container>
+			<!-- 顶栏 -->
+			<el-header height="60">
+				<div class="_title" @click="index()">配置中心</div>
+			</el-header>
+ 
+ 			<!-- 主体 -->
+			<el-main>
+				<div class="login-wrap">
+					<el-form status-icon :model="form" label-width="100px">
+						<el-form-item label="账号" prop="name">
+								<el-input type="text" v-model="form.name" placeholder="请输入账号" autocomplete="off" maxlength="10"></el-input>
+						</el-form-item>
+						<el-form-item label="密码" prop="checkPass">
+								<el-input type="password" v-model="form.password" placeholder="请输入密码" autocomplete="off" maxlength="10"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<el-button class="btn-login" type="primary" @click="login">登录</el-button>
+						</el-form-item>
+						<el-form-item>
+							<el-button class="btn-reset" @click="reset()">重置</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+			</el-main>
+		</el-container>
+	</div>
+
+</body>
+	<script>
+ 
+		// Vue实例化
+		new Vue({
+			el:'#app',
+
+			data: {
+				form: {
+					name: '',
+					password: '',
+				}
+			},
+
+			methods: {
+				login() {
+					if(this.form.name === ''){
+						alert("请输入账户")
+						return
+					}
+					if(this.form.password === ''){
+						alert("请输入密码")
+						return
+					}
+
+					let formData = new FormData();
+					formData.append('name', this.form.name)
+					formData.append('password', this.form.password)
+
+					// 向后台上传账户密码
+					axios.post(host_address+'/user/login', formData).then((response) => {
+						let data = response.data;
+						console.log(data);
+						if(data.code === 0){
+							console.log("登录成功")
+							var user = data.data;
+
+							// 登录用户数据
+							var token_cache = {
+								name: user.name,
+								token: user.token,
+								expired_time: user.time
+							}
+
+							console.log(JSON.stringify(token_cache))
+
+							saveToken(token_cache);
+							location.href = "./configList.html";
+
+						}else{
+							alert(data.msg)
+						}
+
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+
+
+				},
+				// 重置账户、密码
+				reset: function(){
+					this.form.name = ''
+					this.form.password = ''
+				}
+			},
+		})
+ 
+	</script>
+</html>
+ 
+​

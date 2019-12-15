@@ -1,0 +1,827 @@
+​
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- 引入element样式 -->
+	<link rel="stylesheet" href="../css/index.css">
+	<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"> -->
+	<!-- 引入公用样式 -->
+	<link rel="stylesheet" href="../css/common.css">
+	<title>配置列表</title>
+	<!-- 引入vue -->
+  <script src="../js/vue.js"></script>
+  <!-- <script src="https://unpkg.com/vue/dist/vue.js"></script> -->
+	<!-- 引入element组件库 -->
+  <script src="../js/index.js"></script>
+  <script src="../js/tang.js"></script>
+  <!-- <script src="https://unpkg.com/element-ui/lib/index.js"></script> -->
+  <!-- 引入样式 -->
+	<!-- 引入axios -->
+	<script src="../js/axios.min.js"></script>
+	<!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
+</head>
+<body>
+	<div id="app">
+		<el-container>
+			<!-- 顶栏 -->
+			<el-header height="60">
+        <div class="_title" @click="index()">Tang</div>
+        <div class="_center" >欢迎, {{user.name}} <span @click="logout()">退出</span></div>
+      </el-header>
+      
+ 			<!-- 主体 -->
+			<el-main>
+				<div class="config-wrap">
+
+          <!-- 条件过滤 -->
+          <div class="left">
+						<el-form label-position="top" label-width="100px">
+							<el-form-item label="应用名称" prop="name">
+								<el-select v-model="nowApp.name" placeholder="请选择应用名称">
+									<el-option v-for="(item,index) in appData" :key="index" :label="item.label"	@click.native="selectApp(item)" :value="item.id"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="版本号" prop="name">
+								<el-select v-model="nowVersion.name" placeholder="请选择版本号">
+									<el-option v-for="(item,index) in versionData" :key="index" :label="item.label"	@click.native="selectVersion(item)"	:value="item.id"></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="环境名称" prop="name">
+								<el-select v-model="nowEnv.name" placeholder="请选择环境">
+									<el-option v-for="(item,index) in envData" :key="index" :label="item.label"	@click.native="selectEnv(item)"	:value="item.id"></el-option>
+								</el-select>
+							</el-form-item>
+						</el-form>
+          </div>
+
+          <!-- 配置列表 -->
+          <div class="right">
+
+            <!-- 面包屑 -->
+            <div class="bread_crumb">
+                <span >{{nowApp.name}}</span><i class="el-icon-arrow-right"></i>
+                <span>{{nowVersion.name}}</span><i class="el-icon-arrow-right"></i>
+                <span>{{nowEnv.name}}</span>
+            </div>
+
+            <div class="table_list">
+              <!-- 操作按钮 -->
+              <template >
+                <el-button icon="el-icon-plus" type="primary" size="mini" @click="addConfig">新增配置项</el-button>
+              </template>
+              <!-- 配置信息 -->
+              <el-table :border="true" ref="multipleTable" :data="configs" tooltip-effect="dark" style="width: 100%">
+                <el-table-column label="序号" fixed type="index" width="55"></el-table-column>
+                <el-table-column prop="name" label="属性名称" min-width="120px"></el-table-column>
+                <el-table-column prop="content" label="配置信息" min-width="320px" :show-overflow-tooltip='true'></el-table-column>
+                <el-table-column prop="type" label="类型" min-width="60px"></el-table-column>
+                <el-table-column prop="update" label="修改时间" min-width="140px"></el-table-column>
+                <el-table-column label="操作" fixed="right" width="220px">
+                  <template slot-scope="scope">
+                    <el-button type="primary" size="mini" plain  @click="viewConfig(scope.row.id, scope.row.name, scope.row.content)">查看</el-button>
+                    <el-button type="info" size="mini"  plain @click="downLoadConfig(scope.row.id)">下载</el-button>
+                    <el-button type="danger" size="mini"  plain @click="deleteConfig(scope.row.id)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+
+            </div>
+          </div>
+
+				</div>
+			</el-main>
+    </el-container>
+    
+    <!-- 新建弹窗 -->
+		<el-dialog :title="title" :visible.sync="isShow" width="50%" class="dialog-createConfig">
+			<el-form label-position="right" label-width="80px" class="baseInfo">
+				<el-form-item label="应用名称" prop="name">
+					<el-input :disabled="addApp" v-model="paramData.appName" placeholder="请输入应用名称" maxlength="20" show-word-limit></el-input> 
+				</el-form-item>
+				<el-form-item v-if="addVersion" label="版本名称" prop="name">
+					<el-input :disabled="addEvn" v-model="paramData.versionName" placeholder="请输入版本名称" maxlength="20" show-word-limit></el-input> 
+				</el-form-item>
+				<el-form-item v-if="addEvn" label="环境名称" prop="name">
+					<el-input v-model="paramData.envName" placeholder="请输入环境名称" maxlength="20" show-word-limit></el-input> 
+				</el-form-item>
+				<el-form-item label="描述" prop="checkPass">
+					<el-input v-model="paramData.desc" type="textarea" :autosize="{ minRows: 3, maxRows: 5}" placeholder="请输入属性内容" maxlength="200" show-word-limit></el-input> 
+				</el-form-item>
+				<div class="dialog-footer">
+					<el-button size="medium" @click="isShow=false">取 消</el-button>
+					<el-button type="primary" class="sure" size="medium" @click="save">保存</el-button>
+				</div>
+			</el-form>
+    </el-dialog>
+    <!-- 新建配置项弹窗 -->
+		<el-dialog :title="config_path" :visible.sync="isConfigShow" width="50%" class="dialog-createConfig">
+			<el-form label-position="right" label-width="80px" class="baseInfo">
+				<el-form-item label="属性名称" prop="name">
+					<el-input v-model="configData.name" placeholder="请输入属性名称" maxlength="20" show-word-limit></el-input> 
+				</el-form-item>
+        <el-form-item label="属性类型">
+          <el-radio-group v-model="configData.type">
+            <el-radio :label="1">文本录入</el-radio>
+            <!-- <el-radio :label="2">文件上传</el-radio> -->
+          </el-radio-group>
+        </el-form-item>
+				<el-form-item  v-if="configData.type == 1" label="属性内容" prop="checkPass">
+					<el-input v-model="configData.content" type="textarea" :autosize="{ minRows: 15, maxRows: 20}" placeholder="请输入属性内容" maxlength="2000" show-word-limit></el-input> 
+        </el-form-item>
+				<el-form-item v-if="configData.type == 2" label="" prop="checkPass">
+          <el-upload drag action="https://jsonplaceholder.typicode.com/posts/" multiple>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传properties文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+				<div class="dialog-footer">
+					<el-button size="medium" @click="isShow=false">取 消</el-button>
+					<el-button type="primary" class="sure" size="medium" @click="saveConfig">保存</el-button>
+				</div>
+			</el-form>
+    </el-dialog>
+    <!-- 新建配置项弹窗 -->
+		<el-dialog :title="config_path" :visible.sync="isConfigView" width="50%" class="dialog-createConfig">
+			<el-form label-position="right" label-width="80px" class="baseInfo">
+				<el-form-item label="属性名称" prop="name">
+					<el-input v-model="nowConfig.name" placeholder="请输入属性名称" maxlength="20" show-word-limit disabled></el-input> 
+				</el-form-item>
+        <el-form-item label="属性类型">
+          <el-radio-group v-model="nowConfig.type">
+            <el-radio :label="1">文本录入</el-radio>
+            <!-- <el-radio :label="2">文件上传</el-radio> -->
+          </el-radio-group>
+        </el-form-item>
+				<el-form-item  v-if="nowConfig.type == 1" label="属性内容" prop="checkPass">
+					<el-input v-model="nowConfig.content" type="textarea" :autosize="{ minRows: 15, maxRows: 20}" placeholder="请输入属性内容" maxlength="2000" show-word-limit></el-input> 
+        </el-form-item>
+				<el-form-item v-if="nowConfig.type == 2" label="" prop="checkPass">
+          <el-upload drag action="https://jsonplaceholder.typicode.com/posts/" multiple>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传properties文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+				<div class="dialog-footer">
+					<el-button size="medium" @click="isShow=false">取 消</el-button>
+					<el-button type="primary" class="sure" size="medium" @click="modifyConfig">保存</el-button>
+				</div>
+			</el-form>
+    </el-dialog>
+    
+	</div>
+</body>
+
+	<script>
+ 
+		// Vue实例化
+		new Vue({
+			el:'#app',
+
+			data: {
+        user: {
+          name: ''
+        },
+
+        isShow: false,
+
+        // 展示配置项
+        isConfigShow: false,
+        isConfigView: false,
+
+        config_path: '',
+
+        // 配置项数据
+        configData:{
+          name: '',
+          content: '',
+          type: 1 // 1-文本录入， 2-文件上传
+        },
+        
+        // 当前应用
+        nowApp:{
+          id: 0,
+          name: '应用'
+        },
+        create_app: {
+          id: 0, 
+          label: '新建应用'
+        },
+        // 应用列表
+        appData: [],
+        
+        // 当前版本
+        nowVersion:{
+          id: 0,
+          name: '版本'
+        },
+        create_version: {
+          id:0, 
+          label: '新建版本'
+        },
+        // 版本列表
+        versionData: [],
+
+        // 当前环境
+        nowEnv:{
+          id: 0,
+          name: '环境'
+        },
+        create_env: {
+          id:0, 
+          label: '新建环境'
+        },
+        // 环境列表
+        envData: [
+        ],
+        // 表单参数
+        paramData: {
+          appName: '',
+          versionName: '',
+          envName: '',
+					desc: '',
+        },
+
+        title: '',
+        addApp: false,
+        addVersion: false,
+        addEvn: false,
+
+        // 配置信息列表
+        configs: [],
+        // 当前配置信息
+        nowConfig: {
+          name: '',
+          type: 1,
+          content: ''
+        }
+        
+      },
+      // 监控数据
+      watch: {
+        'nowApp.id'() {
+          // 获取版本下拉列表
+          this.getVersionList()
+        },
+        'nowVersion.id'() {
+          // 获取环境列表
+          this.getEnvList()
+        },
+        'nowEnv.id'() {
+          console.log(3)
+          // 获取配置文件
+          this.getConfigList()
+        },
+      },
+
+			mounted() {
+        // 获取缓存
+        var name = expired();
+        console.log("用户名："+name)
+
+        if(name === ''){
+          alert("用户过期")
+          location.href = "../index.html";
+          return
+
+        }else{
+          this.user.name = name;
+        }
+
+				// 获取应用下拉列表
+        this.getAppList()
+        
+			},
+			methods: {
+
+        // 返回首页
+        index: function(){
+          location.href = "./configList.html";
+        },
+
+        //用户退出登录
+				logout: function(){
+          deleteToken();
+          location.href = "../index.html";
+        },
+        
+			// 获取应用名称下拉列表
+				getAppList() {
+          let reqdata = {}
+					axios.get(host_address+'/app/list', reqdata).then((res) => {
+            var data = res.data;
+            if(data.code === 0){
+              this.appData = []
+              this.appData.push(this.create_app)
+              // 成功获取应用列表
+              var apps = data.data
+              apps.forEach(app => {
+                var ap = {
+                  id:0,
+                  label:'',
+                }
+                ap.id = app.id
+                ap.label = app.name
+                this.appData.push(ap)
+              });
+
+              // 设置当前应用
+              this.nowApp.id = this.appData[1].id
+              this.nowApp.name = this.appData[1].label
+
+            }else{
+              alert(data.msg)
+            }
+            
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+        },
+
+        // 获取版本下拉列表
+			  getVersionList() {
+          let reqdata = {};
+
+          let appid = this.nowApp.id
+          
+					axios.get(host_address+'/version/list/'+appid, reqdata).then((res) => {
+            var data = res.data;
+            if(data.code === 0){
+              this.versionData = []
+              this.versionData.push(this.create_version)
+              // 成功获取应用列表
+              var versions = data.data
+              if(versions === null){
+                alert("版本为空")
+                this.nowVersion.id = 0
+                this.nowVersion.name = ''
+                return
+              }
+              versions.forEach(version => {
+                var ver = {
+                  id:0,
+                  label:''
+                }
+                ver.id = version.id
+                ver.label = version.version
+                this.versionData.push(ver)
+              });
+
+              // 设置当前应用
+              this.nowVersion.id = this.versionData[1].id
+              this.nowVersion.name = this.versionData[1].label
+            }else{
+              alert(data.msg)
+            }
+            
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+        },
+
+        // 获取环境下拉列表
+				getEnvList() {
+          let appid = this.nowApp.id
+          let versionid = this.nowVersion.id
+          let reqdata = {}
+					axios.get(host_address+'/env/list/'+appid+"/"+versionid, reqdata).then((res) => {
+            var data = res.data;
+            if(data.code === 0){
+              this.envData = []
+              this.envData.push(this.create_env)
+              // 成功获取应用列表
+              var envs = data.data
+              if(envs === null){
+                alert("环境为空")
+                this.nowEnv.id = 0
+                this.nowEnv.name = ''
+                return
+              }
+              envs.forEach(env => {
+                var en = {
+                  id:0,
+                  label:'',
+                }
+                en.id = env.id
+                en.label = env.code
+                this.envData.push(en)
+              });
+              // 设置当前应用
+              this.nowEnv.id = this.envData[1].id
+              this.nowEnv.name = this.envData[1].label
+            }else{
+              alert(data.msg)
+            }
+            
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+        },
+
+        // 获取配置列表
+				getConfigList() {
+          let appid = this.nowApp.id
+          let versionid = this.nowVersion.id
+          let envid = this.nowEnv.id
+          let reqdata = {}
+					axios.get(host_address+'/config/list/'+appid+"/"+versionid+"/"+envid, reqdata).then((res) => {
+            var data = res.data;
+            if(data.code === 0){
+              this.configs = []
+
+              // 成功获取应用列表
+              var configures = data.data
+              configures.forEach(configure => {
+                var temp = {
+                  id: 0,
+                  name:'',
+                  content: '',
+                  type: '',
+                  list: '',
+                  update: ''
+                }
+
+                temp.id = configure.id
+                temp.name = configure.name
+                temp.content = configure.content
+                temp.type = configure.type
+                temp.update = configure.time
+                this.configs.push(temp)
+
+              });
+            }else{
+              alert(data.msg)
+            }
+            
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+        },
+
+
+        // 新增配置项
+        addConfig(){
+          this.config_path = ''
+          this.config_path = '新增配置项：' + this.nowApp.name + " - " + this.nowVersion.name + " - " +this.nowEnv.name
+          this.isConfigShow = true
+        },
+
+        // 选择应用
+        selectApp(val) {
+          if(val.id==0) {
+            this.title = '新增应用'
+            this.isShow = true;
+            this.addApp = false;
+            this.addVersion = false;
+            this.addEvn = false;
+          }else{
+            this.nowApp.id = val.id
+            this.nowApp.name = val.label
+          }
+        },
+
+        // 选择版本
+        selectVersion(val) {
+          if(val.id==0) {
+            this.title = '新增版本'
+            this.isShow = true;
+            this.addApp = true;
+            this.addVersion = true;
+            this.addEvn = false;
+            // 配置应用名称
+            this.paramData.appName = this.nowApp.name
+          }else{
+            this.nowVersion.id = val.id
+            this.nowVersion.name = val.label
+          }
+        },
+        
+        // 选择环境
+        selectEnv(val) {
+          if(val.id==0) {
+            this.title = '新增环境'
+            this.isShow = true;
+            this.addApp = true;
+            this.addVersion = true;
+            this.addEvn = true;
+            // 配置应用名称
+            this.paramData.appName = this.nowApp.name
+            this.paramData.versionName = this.nowVersion.name
+          }else{
+            this.nowEnv.id = val.id
+            this.nowEnv.name = val.label
+          }
+        },
+
+        // 保存数据
+				save() {
+          // 判断并保存应用
+          if(this.title=='新增应用') {
+            this.saveApp()
+          }
+
+          // 判断并保存版本
+          if(this.title=='新增版本') {
+            this.saveVersion()
+          }
+
+          // 判断并保存环境
+          if(this.title=='新增环境') {
+            this.saveEnv()
+          }
+
+          this.isShow = false;
+          this.paramData.desc = ''
+          return
+        },
+
+        // 保存应用
+        saveApp(){
+          var appName = this.paramData.appName
+            if(appName === undefined || appName === ''){
+              alert("应用名称不能为空")
+              return
+            }
+            var desc = this.paramData.desc
+            if(desc === undefined || desc === ''){
+              alert("描述不能为空")
+              return
+            }
+            // 保存应用
+            let formData = new FormData();
+            formData.append("name", appName)
+            formData.append("description", desc)
+            axios.post(host_address+'/app/save', formData).then((response) => {
+              let data = response.data;
+              console.log(data);
+              if(data.code === 0){
+                let appid = data.data
+                let obj = {
+                  id: appid,
+                  label: appName,
+                }
+                this.appData.push(obj)
+
+                this.nowApp.id = appid;
+                this.nowApp.name = appName;
+
+              }else{
+                alert(data.msg)
+              }
+
+            }).catch((error) => {
+              console.log('失败', error);
+            });
+        },
+
+        // 保存版本
+        saveVersion(){
+          var versionName = this.paramData.versionName
+            if(versionName === undefined || versionName === ''){
+              alert("版本名称不能为空")
+              return
+            }
+            var desc = this.paramData.desc
+            if(desc === undefined || desc === ''){
+              alert("描述不能为空")
+              return
+            }
+
+            // 判断appid
+            var appid = this.nowApp.id;
+            if(appid === undefined || appid === 0){
+              alert("appid不能为空")
+              return
+            }
+
+
+            // 保存版本
+            let formData = new FormData();
+            formData.append("appid", appid)
+            formData.append("name", versionName)
+            formData.append("description", desc)
+            axios.post(host_address+'/version/save', formData).then((response) => {
+              let data = response.data;
+              console.log(data);
+              if(data.code === 0){
+                let id = data.data
+                let obj = {
+                  label: versionName,
+                  id: id,
+                }
+                this.versionData.push(obj)
+                this.nowVersion.id = id;
+                this.nowVersion.name = versionName;
+              }else{
+                alert(data.msg)
+              }
+
+            }).catch((error) => {
+              console.log('失败', error);
+            });
+        },
+
+        // 保存环境
+        saveEnv(){
+          var envName = this.paramData.envName
+            if(envName === undefined || envName === ''){
+              alert("环境名称不能为空")
+              return
+            }
+            var desc = this.paramData.desc
+            if(desc === undefined || desc === ''){
+              alert("描述不能为空")
+              return
+            }
+            // 判断appid
+            var appid = this.nowApp.id;
+            if(appid === undefined || appid === 0){
+              alert("appid不能为空")
+              return
+            }
+            
+            // 判断versionid
+            var versionid = this.nowVersion.id;
+            if(versionid === undefined || versionid === 0){
+              alert("versionid不能为空")
+              return
+            }
+
+            // 保存环境
+            let formData = new FormData();
+            formData.append("appid", appid)
+            formData.append("versionid", versionid)
+            formData.append("code", envName)
+            formData.append("description", desc)
+            axios.post(host_address+'/env/save', formData).then((response) => {
+              let data = response.data;
+              console.log(data);
+              if(data.code === 0){
+                let id = data.data
+                let obj = {
+                  id: 1,
+                  label: envName,
+                }
+                this.envData.push(obj)
+                this.nowEnv.id = id;
+                this.nowEnv.name = envName;
+              }else{
+                alert(data.msg)
+              }
+
+            }).catch((error) => {
+              console.log('失败', error);
+            });
+        },
+        
+        //保存配置
+        saveConfig(){
+          // 判断appid
+          var appid = this.nowApp.id;
+          if(appid === undefined || appid === 0){
+            alert("appid不能为空")
+            return
+          }
+          
+          // 判断versionid
+          var versionid = this.nowVersion.id;
+          if(versionid === undefined || versionid === 0){
+            alert("versionid不能为空")
+            return
+          }
+          // 判断envid
+          var envid = this.nowEnv.id;
+          if(envid === undefined || envid === 0){
+            alert("envid不能为空")
+            return
+          }
+          
+          // 属性名称
+          var configName = this.configData.name;
+          if(configName === undefined || configName === ''){
+            alert("属性名称不能为空")
+            return
+          }
+          var configContent = this.configData.content;
+          // 属性类型
+          var configType = this.configData.type;
+          if(configType === undefined){
+            alert("属性类型不能为空")
+            return
+          }else{
+            if(configType === 1){
+              // 属性内容
+              if(configContent === undefined || configContent === ''){
+                alert("属性内容不能为空")
+                return
+              }
+            }
+          }
+
+          let formData = new FormData();
+					formData.append('name', configName)
+          formData.append('content', configContent)
+					formData.append('type', configType)
+					formData.append('envid', envid)
+					formData.append('versionid', versionid)
+          formData.append('appid', appid)
+          
+          // 文件上传
+          formData.append('file', '')
+
+					// 向后台上传账户密码
+					axios.post(host_address+'/config/save', formData).then((response) => {
+						let data = response.data;
+						console.log(data);
+						if(data.code === 0){
+							console.log("登录成功")
+							var user = data.data;
+
+							// 登录用户数据
+							var token_cache = {
+								name: user.name,
+								token: user.token,
+								expired_time: user.time
+							}
+
+							console.log(JSON.stringify(token_cache))
+
+							saveToken(token_cache);
+							location.href = "./configList.html";
+
+						}else{
+							alert(data.msg)
+						}
+
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+
+
+          return
+          this.isConfigShow = false
+          this.configData.content = ''
+          this.configData.name = ''
+        },
+        
+        // 编辑
+        viewConfig(id, name, content){
+          this.nowConfig.id = id
+          this.nowConfig.name = name
+          this.nowConfig.content = content
+          this.isConfigView = true
+        },
+
+        // 修改配置
+        modifyConfig(){
+          let id = this.nowConfig.id
+          let content = this.nowConfig.content
+
+          let formData = new FormData();
+          formData.append('content', content)
+
+					// 修改配置信息
+					axios.post(host_address+'/config/update/'+id, formData).then((response) => {
+						let data = response.data;
+						console.log(data);
+						if(data.code === 0){
+              console.log("修改成功")
+              this.nowConfig.id = ''
+              this.nowConfig.name = ''
+              this.nowConfig.content = ''
+              this.isConfigView = false
+
+              // 刷新页面
+              this.getConfigList()
+
+						}else{
+							alert(data.msg)
+						}
+
+					}).catch((error) => {
+						console.log('失败', error);
+					});
+
+        },
+
+        // 删除
+        deleteConfig(id){
+          alert("删除："+id)
+        },
+
+        // 下载
+        downLoadConfig(id){
+          alert("下载："+id)
+        },
+
+			},
+		})
+ 
+	</script>
+</html>
+ 
+​

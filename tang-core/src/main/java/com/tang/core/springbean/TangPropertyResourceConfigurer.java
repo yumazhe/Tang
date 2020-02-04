@@ -36,8 +36,8 @@ public abstract class TangPropertyResourceConfigurer extends TangPropertiesLoade
             Properties mergedProps = this.mergeProperties();
             this.convertProperties(mergedProps);
             this.processProperties(beanFactory, mergedProps);
-        } catch (IOException var3) {
-            throw new BeanInitializationException("Could not load properties", var3);
+        } catch (IOException e) {
+            throw new BeanInitializationException("Could not load properties", e);
         }
     }
 

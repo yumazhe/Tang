@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
@@ -39,7 +40,7 @@ public abstract class TangPropertiesLoaderSupport {
             Properties[] properties = this.localProperties;
             int len = properties.length;
 
-            for(int i = 0; i < len; ++i) {
+            for (int i = 0; i < len; ++i) {
                 Properties localProp = properties[i];
                 CollectionUtils.mergePropertiesIntoMap(localProp, result);
             }
@@ -57,7 +58,7 @@ public abstract class TangPropertiesLoaderSupport {
             Resource[] resources = this.locations;
             int len = resources.length;
 
-            for(int i = 0; i < len; ++i) {
+            for (int i = 0; i < len; ++i) {
                 Resource location = resources[i];
                 if (this.logger.isTraceEnabled()) {
                     this.logger.trace("Loading properties file from " + location);
@@ -79,7 +80,6 @@ public abstract class TangPropertiesLoaderSupport {
         }
 
     }
-
 
 
     public void setProperties(Properties properties) {
@@ -111,7 +111,7 @@ public abstract class TangPropertiesLoaderSupport {
     }
 
     public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
-        this.propertiesPersister = (PropertiesPersister)(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+        this.propertiesPersister = (PropertiesPersister) (propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
     }
 
 

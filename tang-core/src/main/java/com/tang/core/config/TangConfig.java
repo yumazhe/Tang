@@ -20,6 +20,10 @@ public class TangConfig {
      * 文件路径分隔符
      */
     public static final String default_file_separator = "/";
+    /**
+     * 默认配置中心的根节点路径
+     */
+    public static final String default_root_path = "tang";
 
     /**
      * 环境配置
@@ -60,24 +64,29 @@ public class TangConfig {
     public static int intervalTime = 5;
 
 
-    public static void init(Properties props){
+    /**
+     * 解析配置文件属性
+     *
+     * @param props
+     */
+    public static void init(Properties props) {
         // 设置环境变量
         String env = props.getProperty("env");
-        if(env == null || env.trim().length() == 0){
+        if (env == null || env.trim().length() == 0) {
             throw new RuntimeException("the env must not be null");
         }
         TangConfig.env = env;
 
         // 设置应用名称
         String appName = props.getProperty("app_name");
-        if(appName == null || appName.trim().length() == 0){
+        if (appName == null || appName.trim().length() == 0) {
             throw new RuntimeException("the appName must not be null");
         }
         TangConfig.appName = appName;
 
         // 设置版本号
         String version = props.getProperty("version");
-        if(version == null || version.trim().length() == 0){
+        if (version == null || version.trim().length() == 0) {
             version = "default";
             logger.warn("there is no app_version setting. default value is {}", version);
         }
@@ -85,47 +94,49 @@ public class TangConfig {
 
         // 设置忽略文件
         String ignore = props.getProperty("ignore");
-        if(ignore != null && ignore.trim().length() > 0){
+        if (ignore != null && ignore.trim().length() > 0) {
             String[] ignores = ignore.split(",");
             TangConfig.ignores = ignores;
         }
 
         // 设置zookeeper地址
         String zkHost = props.getProperty("zookeeper_host");
-        if(zkHost == null || zkHost.trim().length() == 0){
+        if (zkHost == null || zkHost.trim().length() == 0) {
             throw new RuntimeException("the zkHost must not be null");
         }
         TangConfig.zookeeperHost = zkHost;
 
         // 设置应用名称
         String retris = props.getProperty("retry_times");
-        if(retris != null && retris.trim().length() == 0){
+        if (retris != null && retris.trim().length() == 0) {
             TangConfig.retryTimes = Integer.valueOf(retris);
         }
 
         // 设置间隔时间
         String interval = props.getProperty("interval_time");
-        if(interval != null && interval.trim().length() > 0){
+        if (interval != null && interval.trim().length() > 0) {
             TangConfig.intervalTime = Integer.valueOf(interval);
         }
 
+        // 打印配置信息
         print();
     }
 
     /**
      * 判断文件是否被忽略
+     *
      * @param file
      * @return
      */
-    public static boolean ignore(String file){
-        if(file == null || file.trim().length() == 0){
+    public static boolean ignore(String file) {
+        if (file == null || file.trim().length() == 0) {
             return false;
         }
-        if(ignores == null){
+        if (ignores == null) {
             return false;
-        }else{
-            for(String ignore : ignores){
-                if(ignore.equals(file)){
+        } else {
+            for (String ignore : ignores) {
+                if (ignore.equals(file)) {
                     return true;
                 }
             }
@@ -136,6 +147,7 @@ public class TangConfig {
 
     /**
      * 根据文件名称从远程节点获取数据流
+     *
      * @param file
      * @return
      */
@@ -149,7 +161,7 @@ public class TangConfig {
          *                      - env
          *                          - file : value
          */
-        InputStream   in   = null;
+        InputStream in = null;
         try {
 
             // 获取zk节点
@@ -165,10 +177,10 @@ public class TangConfig {
             in = new ByteArrayInputStream(value.getBytes());
             return in;
 
-        }catch (Exception e){
-            throw new TangException("can't get the value from ["+file+"].");
-        }finally {
-            if(in != null){
+        } catch (Exception e) {
+            throw new TangException("can't get the value from [" + file + "].");
+        } finally {
+            if (in != null) {
                 in.close();
             }
         }
@@ -176,39 +188,34 @@ public class TangConfig {
 
     /**
      * 根据文件名称生成节点路径:
-     *            root: /
-     *                    - tang
-     *                        - app_name
-     *                            - version
-     *                                - env
-     *                                    - file : value
+     * root: /
+     *          - tang
+     *              - app_name : 应用名
+     *                  - version ： 版本
+     *                      - env ： 环境
+     *                          - file : value ： 文件名
      *
-     * @param file
+     * @param filename
      * @return
      */
-    private static String generateNode(String file) {
+    private static String generateNode(String filename) {
         StringBuffer sb = new StringBuffer();
-                //根目录
+        //根目录
         sb.append(default_file_separator)
-            // 中间件
-            .append("tang")
-            .append(default_file_separator)
-            // 应用名称
-            .append(appName)
-            .append(default_file_separator)
-            // 版本号
-            .append(appVersion)
-            .append(default_file_separator)
-            // 环境变量
-            .append(env)
-            .append(default_file_separator)
-            // 文件名称
-            .append(file);
+                // 中间件
+                .append(default_root_path).append(default_file_separator)
+                // 应用名称
+                .append(appName).append(default_file_separator)
+                // 版本号
+                .append(appVersion).append(default_file_separator)
+                // 环境变量
+                .append(env).append(default_file_separator)
+                // 文件名称
+                .append(filename);
         return sb.toString();
     }
 
-    public static void print(){
-        logger.debug("环境变量：{}, 应用名称：{}, 版本号：{}, zk地址：{}, 忽略文件：{}, 重试次数: {}次, 间隔时间：{}秒",
-                        env,    appName,   appVersion,  zookeeperHost, ignores, retryTimes, intervalTime);
+    public static void print() {
+        logger.debug("环境变量：{}, 应用名称：{}, 版本号：{}, zk地址：{}, 忽略文件：{}, 重试次数: {}次, 间隔时间：{}秒", env, appName, appVersion, zookeeperHost, ignores, retryTimes, intervalTime);
     }
 }

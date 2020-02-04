@@ -30,6 +30,13 @@ public class TangConfigController {
     @Autowired
     private ITangConfigService configService;
 
+    /**
+     * 保存配置信息
+     * @param bo
+     * @param file
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "save", method = RequestMethod.POST)
     @ResponseBody
     public ResultBody save(ConfigBO bo, @RequestParam(value="file", required = false) MultipartFile file) throws Exception {
@@ -72,11 +79,10 @@ public class TangConfigController {
 
         }
 
-
-
         int configId = configService.save(bo);
 
         //TODO 创建 配置节点
+
 
         ResultBody result = new ResultBody();
         result.setData(configId);
@@ -186,7 +192,7 @@ public class TangConfigController {
         return result;
     }
     /**
-     * 上传文件
+     * TODO 上传文件
      * @return
      * @throws Exception
      */

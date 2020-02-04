@@ -38,6 +38,13 @@ public abstract class TangPropertiesLoaderUtils {
         fillProperties(props, resource, new DefaultPropertiesPersister());
     }
 
+    /**
+     * 填充属性
+     * @param props
+     * @param resource
+     * @param persister
+     * @throws IOException
+     */
     static void fillProperties(Properties props, EncodedResource resource, PropertiesPersister persister) throws IOException {
         InputStream stream = null;
         Reader reader = null;
@@ -53,6 +60,7 @@ public abstract class TangPropertiesLoaderUtils {
                 reader = resource.getReader();
                 persister.load(props, reader);
             } else {
+                // 判断文件是从本地获取还是从远程获取
                 if(TangConfig.ignore(filename)){
                     // 需要从本地获取数据
                     logger.warn("the file[{}] need read from local.", filename);
@@ -64,8 +72,9 @@ public abstract class TangPropertiesLoaderUtils {
                     logger.info("the file[{}] need read from remote.", filename);
                     stream = TangConfig.readFromRemote(filename);
                     if(stream == null){
-                        throw new RuntimeException("con't get the inputstream from ["+filename+"].");
+                        throw new RuntimeException("can't get ["+filename+"]'s inputstream from remote.");
                     }
+                    // 加载属性
                     persister.load(props, stream);
                 }
             }

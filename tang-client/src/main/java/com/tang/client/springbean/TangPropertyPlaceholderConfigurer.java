@@ -113,7 +113,7 @@ public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurer
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
             String value = props.getProperty(keyStr);
-            System.out.println(keyStr + " = " + value);
+            logger.debug(keyStr + " = " + value);
         }
     }
 
@@ -151,18 +151,26 @@ public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurer
         }
     }
 
+    /**
+     * 设置配置中心设置的配置文件
+     * @param root_path
+     * @throws IOException
+     */
     public void setRoot_path(String root_path) throws IOException {
         if(root_path == null || root_path.trim().length() == 0){
             throw new TangException("root_path必须配置");
         }
+
         logger.debug("the root path is [{}]", root_path);
-        // TODO 解析 classpath:env/user-${CONFIG_ENV}.properties 参数
+        // 解析 classpath:env/user-${CONFIG_ENV}.properties 参数
         root_path = StringUtil.parseStringValue(root_path);
 
+        // 加载输入流
         InputStream in = this.getClass().getResourceAsStream(root_path);
         if(in == null ){
             throw new TangException("the file ["+root_path+"] is not exist.");
         }
+
         Properties props = new Properties();
         InputStreamReader inputStreamReader = new InputStreamReader(in, "UTF-8");
         props.load(inputStreamReader);

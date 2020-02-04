@@ -4,8 +4,6 @@ import com.tang.core.config.TangConfig;
 import com.tang.core.exceptions.TangException;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by yuma on 2019/12/9.
@@ -15,8 +13,6 @@ public enum ZookeeperUtil {
      * 实例
      */
     INSTANCE;
-
-    private static final Logger logger = LoggerFactory.getLogger(ZookeeperUtil.class);
 
     private ZkClient zkClient;
 

@@ -29,6 +29,9 @@ public enum ZookeeperUtil {
     private ZooKeeper server;
     private ZKWatcher watcher;
 
+    // 是否需要监听器
+    private boolean isWatcher = TangConfig.isWatcher;
+
     /**
      * 创建对象并初始化数据
      */
@@ -43,10 +46,16 @@ public enum ZookeeperUtil {
             // 建立连接
             try {
                 // 创建监听器
-                watcher = new ZKWatcher();
-                server = new ZooKeeper(TangConfig.zookeeperHost, TangConfig.zookeeperTimeout, watcher);
+                if (isWatcher) {
+                    watcher = new ZKWatcher();
+                    server = new ZooKeeper(TangConfig.zookeeperHost, TangConfig.zookeeperTimeout, watcher);
+                    watcher.setServer(server);
+
+                } else {
+                    server = new ZooKeeper(TangConfig.zookeeperHost, TangConfig.zookeeperTimeout, null);
+
+                }
                 // 设置监听服务
-                watcher.setServer(server);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -62,7 +71,7 @@ public enum ZookeeperUtil {
      * @param value 节点数据
      */
     public void write(String path, String value) throws KeeperException, InterruptedException {
-        Stat stat = server.exists(path, true);
+        Stat stat = server.exists(path, isWatcher);
         if (stat == null) {
             create(path);
         }
@@ -77,7 +86,7 @@ public enum ZookeeperUtil {
      * @param value 节点数据
      */
     public void write(String path, byte[] value) throws KeeperException, InterruptedException {
-        Stat stat = server.exists(path, true);
+        Stat stat = server.exists(path, isWatcher);
         if (stat == null) {
             create(path);
         }
@@ -93,9 +102,9 @@ public enum ZookeeperUtil {
      */
     public String read(String path) throws KeeperException, InterruptedException {
         // 判断节点是否存在
-        Stat stat = server.exists(path, true);
+        Stat stat = server.exists(path, isWatcher);
         if (stat != null) {
-            byte[] data = server.getData(path, false, null);
+            byte[] data = server.getData(path, isWatcher, null);
             return new String(data);
         } else {
             throw new TangException("the path[" + path + "] is not exist.");
@@ -109,7 +118,7 @@ public enum ZookeeperUtil {
      * @return
      */
     public List<String> children(String parent) throws KeeperException, InterruptedException {
-        List<String> nodes = server.getChildren(parent, true);
+        List<String> nodes = server.getChildren(parent, isWatcher);
 
         if (nodes == null) {
             return Collections.EMPTY_LIST;
@@ -131,7 +140,7 @@ public enum ZookeeperUtil {
         }
 
         // 判断节点是否存在
-        Stat stat = server.exists(path, true);
+        Stat stat = server.exists(path, isWatcher);
 
         if (stat == null) {
             int endIndex = path.lastIndexOf("/");

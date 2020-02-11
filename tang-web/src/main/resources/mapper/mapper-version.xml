@@ -26,7 +26,7 @@
     </select>
     <!--  根据id获取版本名称  -->
     <select id="findVersionNameById" resultType="java.lang.String">
-        select version_name from t_version where app_id = #{id};
+        select version_name from t_version where version_id = #{id};
     </select>
 
 </mapper>

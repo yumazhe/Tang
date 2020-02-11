@@ -2,6 +2,7 @@ package com.tang.web.controller.backstage;
 
 import com.tang.core.config.TangConstant;
 import com.tang.core.exceptions.TangException;
+import com.tang.core.utils.FileUtil;
 import com.tang.core.utils.StringUtil;
 import com.tang.core.zookeeper.ZookeeperUtil;
 import com.tang.web.common.ResultBody;
@@ -12,7 +13,6 @@ import com.tang.web.services.ITangAppService;
 import com.tang.web.services.ITangConfigService;
 import com.tang.web.services.ITangEnvService;
 import com.tang.web.services.ITangVersionService;
-import com.tang.web.utils.FileUtil;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 
@@ -98,9 +97,8 @@ public class TangConfigController {
             }
 
         } else {
-            String content = FileUtil.getContent(file);
+            String content = FileUtil.readFile(file.getOriginalFilename(), file.getInputStream());
             bo.setContent(content);
-
         }
 
         int configId = configService.save(bo);
@@ -202,7 +200,12 @@ public class TangConfigController {
             throw new TangException("id must not be null.");
         }
         if (content == null) {
-            throw new TangException("content must not be null.");
+            if (file == null) {
+                // 内容和文件都为空，抛出异常
+                throw new TangException("content or file must not be null.");
+            } else {
+                content = FileUtil.readFile(file.getOriginalFilename(), file.getInputStream());
+            }
         }
 
         configService.update(id, content);
@@ -230,6 +233,7 @@ public class TangConfigController {
 
         return result;
     }
+
 
     /**
      * 更新zk节点数据
@@ -259,64 +263,6 @@ public class TangConfigController {
         } else {
             ZookeeperUtil.INSTANCE.write(path, content);
         }
-    }
-
-
-    /**
-     * TODO 上传文件
-     *
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "upload", method = RequestMethod.POST)
-    @ResponseBody
-    public ResultBody upload(@RequestParam("file") MultipartFile file) throws IOException {
-        ResultBody result = new ResultBody();
-
-        if (file.isEmpty()) {
-            result.setMsg("上传失败，请选择文件");
-            return result;
-        }
-
-
-        // 获取文件
-        String fileName = file.getOriginalFilename();
-        String type = fileName.substring(fileName.lastIndexOf("."));
-        if (!type.equals(".properties")) {
-            result.setMsg("必须为properties文件");
-            return result;
-        }
-
-        InputStream in = null;
-        try {
-            // 解析properties文件
-            in = file.getInputStream();
-
-            Properties properties = new Properties();
-
-            properties.load(in);
-
-            StringBuffer sb = new StringBuffer();
-            Set<Map.Entry<Object, Object>> set = properties.entrySet();
-            for (Map.Entry entry : set) {
-                sb.append(entry.getKey()).append("=").append(entry.getValue()).append("\n");
-            }
-
-            String content = sb.toString();
-            System.out.println(content.length());
-            System.out.println(content);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-        }
-
-        return result;
-
     }
 
 

@@ -58,6 +58,11 @@ public class TangConfig {
      */
     public static int intervalTime = 5;
 
+    /**
+     * 是否需要监听器
+     */
+    public static boolean isWatcher = false;
+
 
     /**
      * 解析配置文件属性
@@ -111,6 +116,12 @@ public class TangConfig {
         String interval = props.getProperty("interval_time");
         if (interval != null && interval.trim().length() > 0) {
             TangConfig.intervalTime = Integer.valueOf(interval);
+        }
+
+        // 设置间隔时间
+        String isWatcher = props.getProperty("isWatcher");
+        if (isWatcher != null && isWatcher.trim().length() > 0) {
+            TangConfig.isWatcher = Boolean.valueOf(isWatcher);
         }
 
         // 打印配置信息

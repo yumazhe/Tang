@@ -38,4 +38,15 @@ public class TangVersionDaoImpl implements ITangVersionDao {
         return versionMapper.list(id);
     }
 
+    /**
+     * 根据id获取版本名称
+     *
+     * @param version
+     * @return
+     */
+    @Override
+    public String findVersionNameById(Integer version) {
+        return versionMapper.findVersionNameById(version);
+    }
+
 }

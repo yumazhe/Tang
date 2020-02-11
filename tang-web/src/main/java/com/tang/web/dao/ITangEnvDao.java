@@ -22,4 +22,11 @@ public interface ITangEnvDao {
      * @param versionid
      */
     List<EnvPO> list(Integer appid, Integer versionid);
+
+    /**
+     * 根据id获取环境名称
+     * @param envid
+     * @return
+     */
+    String findEnvNameById(Integer envid);
 }

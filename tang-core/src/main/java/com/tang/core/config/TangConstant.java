@@ -24,4 +24,20 @@ public class TangConstant {
      * 默认分隔符
      */
     public static final String DEFAULT_VALUE_SEPARATOR = ":";
+
+    /**
+     * 文件路径分隔符
+     */
+    public static final String default_file_separator = "/";
+
+    /**
+     * 默认配置中心的根节点路径
+     */
+    public static final String default_root_path = "tang";
+
+    /**
+     * zookeeper节点的最大值不超过 1M 字节
+     */
+    public static final int zk_value_max_size = 1 * 1024 * 1024;
+
 }

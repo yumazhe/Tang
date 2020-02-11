@@ -3,13 +3,13 @@
 <mapper namespace="com.tang.web.mapper.ITangEnvMapper">
 
     <resultMap id="envMapper" type="com.tang.web.entities.env.EnvPO">
-        <result column="env_id"  property="envId" />
-        <result column="env_code"  property="envCode" />
-        <result column="env_description"  property="envDescription" />
-        <result column="version_id"  property="versionId" />
-        <result column="app_id"  property="appId" />
-        <result column="create_time"  property="createTime" />
-        <result column="update_time"  property="updateTime" />
+        <result column="env_id" property="envId"/>
+        <result column="env_code" property="envCode"/>
+        <result column="env_description" property="envDescription"/>
+        <result column="version_id" property="versionId"/>
+        <result column="app_id" property="appId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <!--    保存应用环境-->
@@ -24,6 +24,10 @@
         select env_id, env_code, env_description, version_id, app_id, create_time, update_time
         from t_env
         where app_id= #{aid} and version_id = #{vid};
+    </select>
+    <!--  根据id获取环境名称  -->
+    <select id="findEnvNameById" resultType="java.lang.String">
+        select env_code from t_env where env_id = #{id};
     </select>
 
 </mapper>

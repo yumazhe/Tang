@@ -18,4 +18,6 @@ public interface ITangVersionMapper {
     // 查询版本列表
     List<VersionPO> list(@Param("id") Integer id);
 
+    // 根据id获取版本名称
+    String findVersionNameById(@Param("id")Integer version);
 }

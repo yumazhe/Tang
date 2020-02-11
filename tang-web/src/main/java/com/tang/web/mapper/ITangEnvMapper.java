@@ -17,4 +17,7 @@ public interface ITangEnvMapper {
 
     // 查询应用列表
     List<EnvPO> list(@Param("aid") Integer appid, @Param("vid") Integer versionid);
+
+    // 根据id获取环境名称
+    String findEnvNameById(@Param("id") Integer envid);
 }

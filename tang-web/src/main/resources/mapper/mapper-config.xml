@@ -34,6 +34,10 @@
         where config_id = #{id};
     </select>
 
+    <select id="findConfigNameById" resultType="java.lang.String">
+        select config_name from t_config where config_id = #{id};
+    </select>
+
     <update id="update">
         update t_config set config_content = #{content}
         where config_id = #{id};

@@ -1,12 +1,16 @@
 package com.tang.core.config;
 
 import com.tang.core.exceptions.TangException;
+import com.tang.core.utils.StringUtil;
 import com.tang.core.zookeeper.ZookeeperUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.PropertiesPersister;
 
 import java.io.*;
+import java.util.List;
 import java.util.Properties;
+
 
 /**
  * Created by yuma on 2019/12/8.
@@ -15,15 +19,6 @@ import java.util.Properties;
 public class TangConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(TangConfig.class);
-
-    /**
-     * 文件路径分隔符
-     */
-    public static final String default_file_separator = "/";
-    /**
-     * 默认配置中心的根节点路径
-     */
-    public static final String default_root_path = "tang";
 
     /**
      * 环境配置
@@ -148,10 +143,35 @@ public class TangConfig {
     /**
      * 根据文件名称从远程节点获取数据流
      *
-     * @param file
+     * @param persister
+     * @param props
+     * @param fileName  文件名称
      * @return
      */
-    public static InputStream readFromRemote(String file) throws IOException {
+    public static void readFromRemote(PropertiesPersister persister, Properties props, String fileName) throws IOException {
+        InputStream in = null;
+        try {
+            // 获取zk节点
+            String node = TangConfig.generateNode(fileName);
+            in = readData(node);
+            persister.load(props, in);
+
+        } catch (Exception e) {
+            throw new TangException("can't get the value from [" + fileName + "].");
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+    }
+
+
+    /**
+     * @param node 节点路径
+     * @return
+     * @throws IOException
+     */
+    private static InputStream readData(String node) throws IOException {
         /**
          * zk: 127.0.0.1:2181
          *  root: /
@@ -164,21 +184,38 @@ public class TangConfig {
         InputStream in = null;
         try {
 
-            // 获取zk节点
-            String node = TangConfig.generateNode(file);
+
             logger.debug("the current node is [{}].", node);
 
-            // 获取节点信息
-            String value = ZookeeperUtil.INSTANCE.read(node);
-            if (value == null || value.trim().length() == 0) {
-                return null;
+            // 节点内容
+            String content = "";
+
+            // 获取节点信息：TODO 需要判断是否存在子节点的情况，如果存在 则需要合并计算
+            List<String> nodes = ZookeeperUtil.INSTANCE.children(node);
+            if (nodes.size() == 0) {
+                content = ZookeeperUtil.INSTANCE.read(node);
+
+            } else {
+                StringBuffer sb = new StringBuffer();
+                for (String child : nodes) {
+                    // 获取子节点信息
+                    String value = ZookeeperUtil.INSTANCE.read(child);
+                    sb.append(value);
+                }
+                content = sb.toString();
+
             }
 
-            in = new ByteArrayInputStream(value.getBytes());
+
+            if (content == null || content.trim().length() == 0) {
+                throw new RuntimeException("can't get [" + node + "]'s inputstream from remote.");
+            }
+
+            in = new ByteArrayInputStream(content.getBytes());
             return in;
 
         } catch (Exception e) {
-            throw new TangException("can't get the value from [" + file + "].");
+            throw new TangException("can't get the value from [" + node + "].");
         } finally {
             if (in != null) {
                 in.close();
@@ -187,32 +224,19 @@ public class TangConfig {
     }
 
     /**
-     * 根据文件名称生成节点路径:
+     * 根据文件名称生成节点路径: /tang/app_name/version/env/file
      * root: /
-     *          - tang
-     *              - app_name : 应用名
-     *                  - version ： 版本
-     *                      - env ： 环境
-     *                          - file : value ： 文件名
+     * - tang
+     * - app_name : 应用名
+     * - version ： 版本
+     * - env ： 环境
+     * - file : value ： 文件名
      *
      * @param filename
      * @return
      */
     private static String generateNode(String filename) {
-        StringBuffer sb = new StringBuffer();
-        //根目录
-        sb.append(default_file_separator)
-                // 中间件
-                .append(default_root_path).append(default_file_separator)
-                // 应用名称
-                .append(appName).append(default_file_separator)
-                // 版本号
-                .append(appVersion).append(default_file_separator)
-                // 环境变量
-                .append(env).append(default_file_separator)
-                // 文件名称
-                .append(filename);
-        return sb.toString();
+        return StringUtil.generateNode(filename, env, appVersion, appName);
     }
 
     public static void print() {

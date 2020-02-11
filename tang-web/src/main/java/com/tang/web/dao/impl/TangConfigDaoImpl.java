@@ -62,4 +62,16 @@ public class TangConfigDaoImpl implements ITangConfigDao {
         configMapper.update(id, content);
     }
 
+    /**
+     * 根据id获取配置属性名称
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public String findConfigNameById(Integer id) {
+        return configMapper.findConfigNameById(id);
+    }
+
+
 }

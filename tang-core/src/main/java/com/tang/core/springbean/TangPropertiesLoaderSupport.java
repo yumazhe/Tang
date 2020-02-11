@@ -5,9 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.lang.Nullable;
@@ -19,7 +22,7 @@ import org.springframework.util.PropertiesPersister;
  * copy from PropertiesLoaderSupport
  */
 public abstract class TangPropertiesLoaderSupport {
-    protected final Log logger = LogFactory.getLog(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(TangPropertiesLoaderSupport.class);
     @Nullable
     protected Properties[] localProperties;
     protected boolean localOverride = false;
@@ -30,6 +33,12 @@ public abstract class TangPropertiesLoaderSupport {
     private String fileEncoding;
     private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
 
+    /**
+     * 合并处理 properties文件中配置的属性
+     *
+     * @return
+     * @throws IOException
+     */
     protected Properties mergeProperties() throws IOException {
         Properties result = new Properties();
         if (this.localOverride) {
@@ -53,6 +62,12 @@ public abstract class TangPropertiesLoaderSupport {
         return result;
     }
 
+    /**
+     * 加载配置文件
+     *
+     * @param props
+     * @throws IOException
+     */
     protected void loadProperties(Properties props) throws IOException {
         if (this.locations != null) {
             Resource[] resources = this.locations;
@@ -60,25 +75,32 @@ public abstract class TangPropertiesLoaderSupport {
 
             for (int i = 0; i < len; ++i) {
                 Resource location = resources[i];
-                if (this.logger.isTraceEnabled()) {
-                    this.logger.trace("Loading properties file from " + location);
-                }
 
-                File file = location.getFile();
                 try {
                     TangPropertiesLoaderUtils.fillProperties(props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
                 } catch (UnknownHostException | FileNotFoundException e) {
                     if (!this.ignoreResourceNotFound) {
                         throw e;
                     }
-
-                    if (this.logger.isDebugEnabled()) {
-                        this.logger.debug("Properties resource not found: " + e.getMessage());
-                    }
                 }
+
+
+                File file = location.getFile();
+                String filename = file.getName();
+
+                // 打印数据
+                print(filename, props);
             }
         }
 
+    }
+
+    private void print(String filename, Properties props) {
+        logger.debug("加载文件名称为:{}", filename);
+        Set<String> keys = props.stringPropertyNames();
+        for (String key : keys) {
+            logger.debug("  -- {}={}", key, props.getProperty(key));
+        }
     }
 
 

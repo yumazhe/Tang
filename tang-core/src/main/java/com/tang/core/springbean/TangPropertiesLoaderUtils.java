@@ -40,6 +40,7 @@ public abstract class TangPropertiesLoaderUtils {
 
     /**
      * 填充属性
+     *
      * @param props
      * @param resource
      * @param persister
@@ -52,30 +53,32 @@ public abstract class TangPropertiesLoaderUtils {
         try {
             String filename = resource.getResource().getFilename();
 
-            // xml格式文件
-            if (filename != null && filename.endsWith(TangConstant.XML_FILE_EXTENSION)) {
+            if (filename == null) {
+                logger.warn("配置文件为null");
+                return;
+            }
+
+            if (filename.endsWith(TangConstant.XML_FILE_EXTENSION)) {
+                // xml格式文件
                 stream = resource.getInputStream();
                 persister.loadFromXml(props, stream);
+
             } else if (resource.requiresReader()) {
                 reader = resource.getReader();
                 persister.load(props, reader);
+
             } else {
                 // 判断文件是从本地获取还是从远程获取
-                if(TangConfig.ignore(filename)){
+                if (TangConfig.ignore(filename)) {
                     // 需要从本地获取数据
                     logger.warn("the file[{}] need read from local.", filename);
                     stream = resource.getInputStream();
                     persister.load(props, stream);
 
-                }else{
+                } else {
                     // 需要从zookeeper获取数据
                     logger.info("the file[{}] need read from remote.", filename);
-                    stream = TangConfig.readFromRemote(filename);
-                    if(stream == null){
-                        throw new RuntimeException("can't get ["+filename+"]'s inputstream from remote.");
-                    }
-                    // 加载属性
-                    persister.load(props, stream);
+                    TangConfig.readFromRemote(persister, props, filename);
                 }
             }
         } finally {
@@ -114,7 +117,7 @@ public abstract class TangPropertiesLoaderUtils {
     }
 
     public static Properties loadAllProperties(String resourceName) throws IOException {
-        return loadAllProperties(resourceName, (ClassLoader)null);
+        return loadAllProperties(resourceName, (ClassLoader) null);
     }
 
     public static Properties loadAllProperties(String resourceName, @Nullable ClassLoader classLoader) throws IOException {
@@ -127,8 +130,8 @@ public abstract class TangPropertiesLoaderUtils {
         Enumeration<URL> urls = classLoaderToUse != null ? classLoaderToUse.getResources(resourceName) : ClassLoader.getSystemResources(resourceName);
         Properties props = new Properties();
 
-        while(urls.hasMoreElements()) {
-            URL url = (URL)urls.nextElement();
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
             URLConnection con = url.openConnection();
             ResourceUtils.useCachesIfNecessary(con);
             InputStream is = con.getInputStream();

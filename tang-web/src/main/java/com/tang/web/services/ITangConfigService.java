@@ -13,6 +13,7 @@ public interface ITangConfigService {
 
     /**
      * 保存应用
+     *
      * @param bo
      * @return
      */
@@ -20,15 +21,17 @@ public interface ITangConfigService {
 
     /**
      * 查询应用列表
-     * @return
+     *
      * @param appid
      * @param versionid
      * @param envid
+     * @return
      */
     List<ConfigPO> list(Integer appid, Integer versionid, Integer envid);
 
     /**
      * 获取配置详情
+     *
      * @param id
      * @return
      */
@@ -36,8 +39,18 @@ public interface ITangConfigService {
 
     /**
      * 更新配置信息
+     *
      * @param id
      * @param content
      */
     void update(Integer id, String content);
+
+    /**
+     * 根据id获取配置属性名称
+     *
+     * @param id
+     * @return
+     */
+    String findConfigNameById(Integer id);
+
 }

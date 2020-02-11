@@ -43,4 +43,15 @@ public class TangEnvService implements ITangEnvService {
 
         return envDao.list(appid, versionid);
     }
+
+    /**
+     * 根据id获取环境名称
+     *
+     * @param envid
+     * @return
+     */
+    @Override
+    public String findEnvNameById(Integer envid) {
+        return envDao.findEnvNameById(envid);
+    }
 }

@@ -22,4 +22,8 @@
         select app_id, app_name, app_description, create_time, update_time from t_app;
     </select>
 
+    <select id="findAppNameById" resultType="java.lang.String">
+        select app_name from t_app where app_id = #{id};
+    </select>
+
 </mapper>

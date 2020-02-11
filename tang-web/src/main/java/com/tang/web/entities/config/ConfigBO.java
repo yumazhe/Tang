@@ -31,6 +31,8 @@ public class ConfigBO {
      */
     private String type = "1";
 
+
+
     public String getName() {
         return name;
     }

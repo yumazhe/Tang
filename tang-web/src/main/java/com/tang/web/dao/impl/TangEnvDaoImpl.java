@@ -39,4 +39,15 @@ public class TangEnvDaoImpl implements ITangEnvDao {
         return envMapper.list(appid, versionid);
     }
 
+    /**
+     * 根据id获取环境名称
+     *
+     * @param envid
+     * @return
+     */
+    @Override
+    public String findEnvNameById(Integer envid) {
+        return envMapper.findEnvNameById(envid);
+    }
+
 }

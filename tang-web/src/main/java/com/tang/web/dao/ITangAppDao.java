@@ -21,4 +21,11 @@ public interface ITangAppDao {
      * @return
      */
     List<AppPO> list();
+
+    /**
+     * 根据id获取应用名称
+     * @param appid
+     * @return
+     */
+    String findAppNameById(Integer appid);
 }

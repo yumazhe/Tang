@@ -40,4 +40,15 @@ public class TangAppService implements ITangAppService {
 
         return appDao.list();
     }
+
+    /**
+     * 根据id获取应用名称
+     *
+     * @param appid
+     * @return
+     */
+    @Override
+    public String findAppNameById(Integer appid) {
+        return appDao.findAppNameById(appid);
+    }
 }

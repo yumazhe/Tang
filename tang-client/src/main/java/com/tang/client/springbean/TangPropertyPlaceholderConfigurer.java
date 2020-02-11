@@ -25,15 +25,15 @@ import java.util.*;
  * copy from PropertyPlaceholderConfigurer
  * 加载resources路径下的文件
  * 使用方法：
- *      <bean id="propertyConfigurer" class="com.tang.client.springbean.TangPropertyPlaceholderConfigurer">
- *          <property name="root_path" value="/META-INF/tang/server-${CONFIG_ENV}.properties"/>
- *         <property name="locations">
- *             <list>
- *                 <value>classpath:dubbo.properties</value>
- *                 <value>classpath:env/random-${CONFIG_ENV}.properties</value>
- *             </list>
- *         </property>
- *     </bean>
+ * <bean id="propertyConfigurer" class="com.tang.client.springbean.TangPropertyPlaceholderConfigurer">
+ * <property name="root_path" value="/META-INF/tang/server-${CONFIG_ENV}.properties"/>
+ * <property name="locations">
+ * <list>
+ * <value>classpath:dubbo.properties</value>
+ * <value>classpath:env/random-${CONFIG_ENV}.properties</value>
+ * </list>
+ * </property>
+ * </bean>
  */
 public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurerSupport {
 
@@ -105,15 +105,25 @@ public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurer
     }
 
     @Override
-    protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
+    public void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
         StringValueResolver valueResolver = new TangPropertyPlaceholderConfigurer.PlaceholderResolvingStringValueResolver(props);
         this.doProcessProperties(beanFactoryToProcess, valueResolver);
 
         // 打印数据
+        print(props);
+    }
+
+    /**
+     * 打印加载的键值对
+     *
+     * @param props
+     */
+    private void print(Properties props) {
+        logger.debug("打印加载的键值对：");
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
             String value = props.getProperty(keyStr);
-            logger.debug(keyStr + " = " + value);
+            logger.debug("  -- {} = {}", keyStr, value);
         }
     }
 
@@ -153,11 +163,12 @@ public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurer
 
     /**
      * 设置配置中心设置的配置文件
+     *
      * @param root_path
      * @throws IOException
      */
     public void setRoot_path(String root_path) throws IOException {
-        if(root_path == null || root_path.trim().length() == 0){
+        if (root_path == null || root_path.trim().length() == 0) {
             throw new TangException("root_path必须配置");
         }
 
@@ -167,8 +178,8 @@ public class TangPropertyPlaceholderConfigurer extends TangPlaceholderConfigurer
 
         // 加载输入流
         InputStream in = this.getClass().getResourceAsStream(root_path);
-        if(in == null ){
-            throw new TangException("the file ["+root_path+"] is not exist.");
+        if (in == null) {
+            throw new TangException("the file [" + root_path + "] is not exist.");
         }
 
         Properties props = new Properties();

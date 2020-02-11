@@ -3,7 +3,10 @@ package com.tang.web.services.impl;
 import com.tang.web.dao.ITangConfigDao;
 import com.tang.web.entities.config.ConfigBO;
 import com.tang.web.entities.config.ConfigPO;
+import com.tang.web.services.ITangAppService;
 import com.tang.web.services.ITangConfigService;
+import com.tang.web.services.ITangEnvService;
+import com.tang.web.services.ITangVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,8 @@ public class TangConfigService implements ITangConfigService {
 
     @Autowired
     private ITangConfigDao configDao;
+
+
     /**
      * 保存应用
      *
@@ -25,7 +30,7 @@ public class TangConfigService implements ITangConfigService {
      */
     @Override
     public int save(ConfigBO bo) {
-        ConfigPO po  = bo.toPO();
+        ConfigPO po = bo.toPO();
 
         configDao.save(po);
         return po.getConfigId();
@@ -34,10 +39,10 @@ public class TangConfigService implements ITangConfigService {
     /**
      * 查询应用列表
      *
-     * @return
      * @param appid
      * @param versionid
      * @param envid
+     * @return
      */
     @Override
     public List<ConfigPO> list(Integer appid, Integer versionid, Integer envid) {
@@ -66,4 +71,16 @@ public class TangConfigService implements ITangConfigService {
     public void update(Integer id, String content) {
         configDao.update(id, content);
     }
+
+    /**
+     * 根据id获取配置属性名称
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public String findConfigNameById(Integer id) {
+        return configDao.findConfigNameById(id);
+    }
+
 }

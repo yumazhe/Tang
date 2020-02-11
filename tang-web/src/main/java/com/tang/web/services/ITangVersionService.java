@@ -24,4 +24,12 @@ public interface ITangVersionService {
      * @param id
      */
     List<VersionPO> list(Integer id);
+
+    /**
+     * 根据id获取版本名称
+     *
+     * @param version
+     * @return
+     */
+    String findVersionNameById(Integer version);
 }

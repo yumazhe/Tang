@@ -16,13 +16,21 @@ public class ZookeeperTest {
          zkClient = new ZkClient(host, timeout);
 
         String path = "/tang/disconf_demo/1_0_0_0/local/user-local.properties";
-        String value = "dubbo.registry.zookeeper = 192.168.1.1:2181\ndubbo.registry.zookeeper2 = 192.168.1.1:2182";
+        String value = "dubbo.registry.zookeeper = 192.168.1.1:2181\ndubbo.registry.zookeeper2 = 192.168.1.1:2183";
+        delete(path);
         write(path, value);
 
         read(path);
 
     }
 
+
+    public static void delete(String path){
+        boolean exist = zkClient.exists(path);
+        if(exist){
+            zkClient.delete(path);
+        }
+    }
 
     public static void write(String path, String value){
         boolean exist = zkClient.exists(path);

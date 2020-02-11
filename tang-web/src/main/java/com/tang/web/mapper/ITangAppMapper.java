@@ -2,6 +2,7 @@ package com.tang.web.mapper;
 
 import com.tang.web.entities.app.AppPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ public interface ITangAppMapper {
 
     // 查询应用列表
     List<AppPO> list();
+
+    // 根据appid获取app名称
+    String findAppNameById(@Param("id") Integer appid);
 }

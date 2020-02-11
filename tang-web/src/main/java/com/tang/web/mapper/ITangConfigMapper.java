@@ -23,4 +23,8 @@ public interface ITangConfigMapper {
 
     // 更新配置详情
     void update(@Param("id") Integer id, @Param("content") String content);
+
+    // 根据id获取配置名称
+    String findConfigNameById(@Param("id")Integer id);
+
 }

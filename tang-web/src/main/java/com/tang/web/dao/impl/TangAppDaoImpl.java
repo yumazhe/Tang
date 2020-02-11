@@ -38,4 +38,15 @@ public class TangAppDaoImpl implements ITangAppDao {
         return appMapper.list();
     }
 
+    /**
+     * 根据id获取应用名称
+     *
+     * @param appid
+     * @return
+     */
+    @Override
+    public String findAppNameById(Integer appid) {
+        return appMapper.findAppNameById(appid);
+    }
+
 }
